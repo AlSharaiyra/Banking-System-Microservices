@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AccountNumberGenerator.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">account</a> &gt; <a href="index.source.html" class="el_package">com.warba.banking.account.infra.util</a> &gt; <span class="el_source">AccountNumberGenerator.java</span></div><h1>AccountNumberGenerator.java</h1><pre class="source lang-java linenums">package com.warba.banking.account.infra.util;
+
+import com.warba.banking.account.model.enums.AccountType;
+
+import java.util.Map;
+import java.util.Random;
+
+<span class="nc" id="L8">public class AccountNumberGenerator {</span>
+    public static Long generateAccountNumber(Long customerId, AccountType accountType, Integer accountCount) {
+        // Define account type mapping
+<span class="fc" id="L11">        Map&lt;AccountType, Integer&gt; accountTypeMap = Map.of(</span>
+<span class="fc" id="L12">                AccountType.SAVING, 300,</span>
+<span class="fc" id="L13">                AccountType.SALARY, 500,</span>
+<span class="fc" id="L14">                AccountType.INVESTMENT, 700</span>
+        );
+
+        // Get the account type code
+<span class="fc" id="L18">        Integer accountTypeCode = accountTypeMap.get(accountType);</span>
+<span class="pc bpc" id="L19" title="1 of 2 branches missed.">        if (accountTypeCode == null) {</span>
+<span class="nc" id="L20">            throw new IllegalArgumentException(&quot;Invalid account type&quot;);</span>
+        }
+
+        // Generate the account number
+<span class="fc" id="L24">        Random rand = new Random();</span>
+<span class="fc" id="L25">        return Long.parseLong(String.valueOf(customerId) + String.valueOf(accountTypeCode + rand.nextInt(99) + 1));</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

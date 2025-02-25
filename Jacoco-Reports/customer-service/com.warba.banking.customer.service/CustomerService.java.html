@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CustomerService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">customer</a> &gt; <a href="index.source.html" class="el_package">com.warba.banking.customer.service</a> &gt; <span class="el_source">CustomerService.java</span></div><h1>CustomerService.java</h1><pre class="source lang-java linenums">package com.warba.banking.customer.service;
+
+import com.warba.banking.common.exceptions.ResourceNotFoundException;
+import com.warba.banking.customer.infra.exception.DuplicateResourceException;
+import com.warba.banking.customer.model.mapper.AddressMapper;
+import com.warba.banking.customer.model.mapper.CustomerMapper;
+import com.warba.banking.customer.model.request.CreateCustomerRequest;
+import com.warba.banking.customer.model.request.UpdateAddressRequest;
+import com.warba.banking.customer.model.request.UpdateCustomerRequest;
+import com.warba.banking.customer.model.response.CustomerResponse;
+import com.warba.banking.customer.repository.entity.Address;
+import com.warba.banking.customer.repository.entity.Customer;
+import com.warba.banking.customer.repository.repo.CustomerRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+<span class="fc" id="L23">@Log4j2</span>
+@RequiredArgsConstructor
+@Service
+public class CustomerService {
+    private final CustomerRepository customerRepository;
+    private final CustomerMapper customerMapper;
+    private final AddressMapper addressMapper;
+
+    /**
+     * This method is responsible for creating a new customer.
+     *
+     * @param request data to create a new customer.
+     * @return CustomerResponse of created customer.
+     */
+    @Transactional
+    public CustomerResponse createNewCustomer(CreateCustomerRequest request) {
+<span class="fc" id="L39">        Address address = addressMapper.toAddress(request.address());</span>
+
+<span class="fc" id="L41">        Customer customer = customerMapper.toCustomer(request);</span>
+<span class="fc" id="L42">        customer.setAddress(address);</span>
+
+        // Set the total number of accounts to 0
+<span class="fc" id="L45">        customer.setTotalAccounts(0);</span>
+
+        // Set the has_salary_account to false
+<span class="fc" id="L48">        customer.setHasSalaryAccount(false);</span>
+
+<span class="fc bfc" id="L50" title="All 2 branches covered.">        if (customerRepository.findByLegalId(request.legalId()).isPresent())</span>
+<span class="fc" id="L51">            throw new DuplicateResourceException(&quot;Legal ID already exists&quot;);</span>
+
+<span class="fc bfc" id="L53" title="All 2 branches covered.">        if (customerRepository.findByMobileNumber(request.mobileNumber()).isPresent())</span>
+<span class="fc" id="L54">            throw new DuplicateResourceException(&quot;Mobile number already exists&quot;);</span>
+
+<span class="fc" id="L56">        customerRepository.save(customer);</span>
+<span class="fc" id="L57">        log.info(&quot;Customer created with customer ID: {}&quot;, customer.getId());</span>
+
+<span class="fc" id="L59">        return customerMapper.toCustomerView(customer);</span>
+    }
+
+    /**
+     * This method is responsible for retrieving all customers.
+     *
+     * @return CustomerResponse of created customer.
+     */
+    public List&lt;CustomerResponse&gt; getAllCustomers(){
+<span class="fc" id="L68">        List&lt;Customer&gt; customers = customerRepository.findAll();</span>
+
+<span class="fc bfc" id="L70" title="All 2 branches covered.">        if (customers.isEmpty())</span>
+<span class="fc" id="L71">            throw new ResourceNotFoundException(&quot;No customers found&quot;);</span>
+
+<span class="fc" id="L73">        return customers.stream().map(customerMapper::toCustomerView).collect(Collectors.toList());</span>
+    }
+
+    /**
+     * A Unified Searching method
+     * This method is responsible for searching for customers using id, legalId, and name.
+     *
+     * @param criteria of searching.
+     * @param value to search about.
+     *
+     * @return Object , the search results.
+     */
+    public Object searchCustomer(String criteria, String value) {
+<span class="fc" id="L86">        log.debug(&quot;Searching for customer by: {}, with value:{}&quot;, criteria, value);</span>
+
+<span class="fc bfc" id="L88" title="All 4 branches covered.">        return switch (criteria.toLowerCase()) {</span>
+<span class="fc" id="L89">            case &quot;id&quot; -&gt; customerRepository.findById(Long.valueOf(value)).map(customerMapper::toCustomerView)</span>
+<span class="pc" id="L90">                    .orElseThrow(() -&gt; new ResourceNotFoundException(&quot;Customer not found with ID: &quot; + value));</span>
+
+//            case &quot;customerid&quot; -&gt; customerRepository.findByCustomerId(value).map(customerMapper::toCustomerView)
+//                    .orElseThrow(() -&gt; new ResourceNotFoundException(&quot;Customer not found with customer ID: &quot; + value));
+
+<span class="fc" id="L95">            case &quot;legalid&quot; -&gt; customerRepository.findByLegalId(value).map(customerMapper::toCustomerView)</span>
+<span class="pc" id="L96">                    .orElseThrow(() -&gt; new ResourceNotFoundException(&quot;Customer not found with legal ID: &quot; + value));</span>
+
+<span class="fc" id="L98">            case &quot;name&quot; -&gt; customerRepository.findByNameContainingIgnoreCase(value).stream()</span>
+<span class="fc" id="L99">                    .map(customerMapper::toCustomerView).collect(Collectors.toList());</span>
+
+<span class="fc" id="L101">            default -&gt; throw new IllegalArgumentException(&quot;Invalid search criteria.&quot;);</span>
+        };
+    }
+
+    /**
+     * This method is responsible for updating existing customer data.
+     *
+     * @param id of customer to be updated.
+     * @param request update an existing customer.
+     *
+     * @return CustomerResponse of updated customer.
+     */
+    @Transactional
+    public CustomerResponse updateCustomer(Long id, UpdateCustomerRequest request){
+<span class="fc" id="L115">        Customer customer = customerRepository.findById(id)</span>
+<span class="pc" id="L116">                .orElseThrow(() -&gt; new ResourceNotFoundException(&quot;Customer not found with customer ID: &quot; + id));</span>
+
+<span class="fc" id="L118">        Optional.ofNullable(request.customerType())</span>
+<span class="fc" id="L119">                .ifPresent(customer::setCustomerType);</span>
+
+<span class="fc" id="L121">        Optional.ofNullable(request.mobileNumber())</span>
+<span class="pc bpc" id="L122" title="1 of 2 branches missed.">                .filter(mobile -&gt; !mobile.isBlank())</span>
+<span class="fc" id="L123">                .ifPresent(customer::setMobileNumber);</span>
+
+<span class="fc" id="L125">        customerRepository.save(customer);</span>
+<span class="fc" id="L126">        log.info(&quot;Customer updated successfully.&quot;);</span>
+
+<span class="fc" id="L128">        return customerMapper.toCustomerView(customer);</span>
+    }
+
+    /**
+     * This method is responsible for updating existing customer address.
+     *
+     * @param id of customer`s address to be updated.
+     * @param request update an existing customer address.
+     *
+     * @return Address of updated address.
+     */
+    @Transactional
+    public Address updateCustomerAddress(Long id, UpdateAddressRequest request){
+<span class="fc" id="L141">        Customer customer = customerRepository.findById(id)</span>
+<span class="pc" id="L142">                .orElseThrow(() -&gt; new ResourceNotFoundException(&quot;Customer not found with customer ID: &quot; + id));</span>
+
+<span class="fc" id="L144">        Address address = customer.getAddress();</span>
+
+<span class="fc" id="L146">        Optional.ofNullable(request.label())</span>
+<span class="pc bpc" id="L147" title="1 of 2 branches missed.">                .filter(label -&gt; !label.isBlank())</span>
+<span class="fc" id="L148">                .ifPresent(address::setLabel);</span>
+
+<span class="fc" id="L150">        Optional.ofNullable(request.country())</span>
+<span class="pc bpc" id="L151" title="1 of 2 branches missed.">                .filter(country -&gt; !country.isBlank())</span>
+<span class="fc" id="L152">                .ifPresent(address::setCountry);</span>
+
+<span class="fc" id="L154">        Optional.ofNullable(request.city())</span>
+<span class="pc bpc" id="L155" title="1 of 2 branches missed.">                .filter(city -&gt; !city.isBlank())</span>
+<span class="fc" id="L156">                .ifPresent(address::setCity);</span>
+
+<span class="fc" id="L158">        Optional.ofNullable(request.street())</span>
+<span class="pc bpc" id="L159" title="1 of 2 branches missed.">                .filter(street -&gt; !street.isBlank())</span>
+<span class="fc" id="L160">                .ifPresent(address::setStreet);</span>
+
+<span class="fc" id="L162">        Optional.ofNullable(request.buildingNumber())</span>
+<span class="fc" id="L163">                .ifPresent(address::setBuildingNumber);</span>
+
+<span class="fc" id="L165">        customer.setAddress(address);</span>
+
+<span class="fc" id="L167">        customerRepository.save(customer);</span>
+<span class="fc" id="L168">        log.info(&quot;Customer address updated successfully.&quot;);</span>
+
+<span class="fc" id="L170">        return address;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

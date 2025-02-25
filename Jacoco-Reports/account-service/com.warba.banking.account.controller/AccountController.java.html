@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AccountController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">account</a> &gt; <a href="index.source.html" class="el_package">com.warba.banking.account.controller</a> &gt; <span class="el_source">AccountController.java</span></div><h1>AccountController.java</h1><pre class="source lang-java linenums">package com.warba.banking.account.controller;
+
+import com.warba.banking.account.model.request.CreateAccountRequest;
+import com.warba.banking.account.model.request.UpdateAccountStatusRequest;
+import com.warba.banking.account.model.response.AccountResponse;
+import com.warba.banking.account.service.AccountService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+<span class="fc" id="L18">@Log4j2</span>
+@Tag(name = &quot;Accounts&quot;,
+        description = &quot;A set of APIs to perform management and operations on customers` bank accounts and their related data.&quot;)
+@RestController
+@RequestMapping(&quot;/accounts&quot;)
+@RequiredArgsConstructor
+public class AccountController {
+    private final AccountService accountService;
+
+    @Operation(description = &quot;&quot;&quot;
+            An API call to create a new bank account for a customer.
+            Checks for existence of customer, and validates the ability to create a new bank account for that customer.
+            &quot;&quot;&quot;)
+    @ResponseStatus(HttpStatus.CREATED)
+    @PostMapping(&quot;/{customerId}&quot;)
+    public ResponseEntity&lt;AccountResponse&gt; createAccount(@PathVariable Long customerId, @Valid @RequestBody CreateAccountRequest request){
+<span class="fc" id="L34">        log.debug(&quot;Creating new bank account of type: {}, for customer with ID: {}&quot;, request.accountType(), customerId);</span>
+
+<span class="fc" id="L36">        AccountResponse response = accountService.createNewAccount(customerId, request);</span>
+
+<span class="fc" id="L38">        return ResponseEntity.status(HttpStatus.CREATED).body(response);</span>
+    }
+
+    @Operation(description = &quot;&quot;&quot;
+            An API call to get all customer`s accounts.
+            &quot;&quot;&quot;)
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping(&quot;/customer/{customerId}&quot;)
+    public List&lt;AccountResponse&gt; getCustomerAccounts(@PathVariable Long customerId){
+<span class="fc" id="L47">        log.debug(&quot;Retrieving all accounts for customer with ID: {}&quot;, customerId);</span>
+
+<span class="fc" id="L49">        return accountService.getCustomerAccounts(customerId);</span>
+    }
+
+    @Operation(description = &quot;&quot;&quot;
+            An API call to get a customer account.
+            &quot;&quot;&quot;)
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping(&quot;/{accountNo}&quot;)
+    public AccountResponse getAccount(@PathVariable Long accountNo){
+<span class="fc" id="L58">        log.debug(&quot;Retrieving account with account number: {}&quot;, accountNo);</span>
+
+<span class="fc" id="L60">        return accountService.getAccount(accountNo);</span>
+    }
+
+    @Operation(description = &quot;&quot;&quot;
+            An API call to update account status.
+            &quot;&quot;&quot;)
+    @ResponseStatus(HttpStatus.OK)
+    @PutMapping(&quot;/{accountNo}&quot;)
+    public AccountResponse updateAccountStatus(@PathVariable Long accountNo, @RequestBody @Valid UpdateAccountStatusRequest request){
+<span class="fc" id="L69">        log.debug(&quot;Updating account status with account number: {}&quot;, accountNo);</span>
+
+<span class="fc" id="L71">        return accountService.updateAccountStatus(accountNo, request);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

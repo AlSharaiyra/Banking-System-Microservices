@@ -1,0 +1,52 @@
+services:
+  mysql-accounts:
+    image: mysql:latest
+    container_name: mysql-accounts
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: accounts
+      MYSQL_USER: accounts_user
+      MYSQL_PASSWORD: accounts_pass
+    ports:
+      - "3306:3306"
+    volumes:
+      - accounts_data:/var/lib/mysql
+    networks:
+      - app-network
+
+  mysql-customers:
+    image: mysql:latest
+    container_name: mysql-customers
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: cyberghost23@mysql
+      MYSQL_DATABASE: customers
+      MYSQL_USER: customers_user
+      MYSQL_PASSWORD: customers_pass
+    ports:
+      - "3307:3306"  # Different port to avoid conflict with the first DB
+    volumes:
+      - customers_data:/var/lib/mysql
+    networks:
+      - app-network
+
+  rabbitmq:
+    image: rabbitmq:management-alpine
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"  # RabbitMQ messaging port
+      - "15672:15672" # RabbitMQ management console
+    volumes:
+      - ~/.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
+      - ~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq
+    networks:
+      - app-network
+
+volumes:
+  accounts_data:
+  customers_data:
+
+networks:
+  app-network:
+    driver: bridge

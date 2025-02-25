@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SevenDigitIdGenerator.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">customer</a> &gt; <a href="index.source.html" class="el_package">com.warba.banking.customer.infra.util</a> &gt; <span class="el_source">SevenDigitIdGenerator.java</span></div><h1>SevenDigitIdGenerator.java</h1><pre class="source lang-java linenums">package com.warba.banking.customer.infra.util;
+
+import com.warba.banking.customer.infra.exception.RetryLimitExceededException;
+import org.hibernate.engine.spi.SharedSessionContractImplementor;
+import org.hibernate.id.IdentifierGenerator;
+
+import java.io.Serializable;
+import java.util.Random;
+
+<span class="fc" id="L10">public class SevenDigitIdGenerator implements IdentifierGenerator {</span>
+
+    private static final long MIN_ID = 1000000L;  // Smallest 7-digit number
+    private static final long MAX_ID = 9999999L;  // Largest 7-digit number
+    private static final int MAX_ATTEMPTS = 10;   // Maximum retries
+
+    @Override
+    public Serializable generate(SharedSessionContractImplementor session, Object object) {
+<span class="nc" id="L18">        Random random = new Random();</span>
+        Long generatedId;
+<span class="nc" id="L20">        int attempts = 0;</span>
+
+        do {
+<span class="nc bnc" id="L23" title="All 2 branches missed.">            if (attempts++ &gt;= MAX_ATTEMPTS) {</span>
+<span class="nc" id="L24">                throw new RetryLimitExceededException(&quot;Failed to generate unique ID after &quot; + MAX_ATTEMPTS + &quot; attempts&quot;);</span>
+            }
+<span class="nc" id="L26">            generatedId = MIN_ID + random.nextInt((int) (MAX_ID - MIN_ID + 1));</span>
+<span class="nc bnc" id="L27" title="All 2 branches missed.">        } while (idExists(session, generatedId));</span>
+
+<span class="nc" id="L29">        return generatedId;</span>
+    }
+
+    private boolean idExists(SharedSessionContractImplementor session, Long id) {
+
+<span class="nc" id="L34">        String hql = &quot;SELECT 1 FROM Customer WHERE id = :id&quot;;</span>
+<span class="nc" id="L35">        return session.createQuery(hql, Integer.class)</span>
+<span class="nc" id="L36">                .setParameter(&quot;id&quot;, id)</span>
+<span class="nc" id="L37">                .setMaxResults(1)  // Stop scanning after the first match</span>
+<span class="nc bnc" id="L38" title="All 2 branches missed.">                .uniqueResult() != null;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

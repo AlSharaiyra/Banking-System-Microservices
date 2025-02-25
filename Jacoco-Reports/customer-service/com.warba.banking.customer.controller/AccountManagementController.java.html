@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AccountManagementController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">customer</a> &gt; <a href="index.source.html" class="el_package">com.warba.banking.customer.controller</a> &gt; <span class="el_source">AccountManagementController.java</span></div><h1>AccountManagementController.java</h1><pre class="source lang-java linenums">package com.warba.banking.customer.controller;
+
+import com.warba.banking.common.dto.CustomerDetailsDTO;
+import com.warba.banking.customer.service.AccountManagementService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+<span class="fc" id="L14">@Log4j2</span>
+@Tag(name = &quot;Account Management&quot;,
+        description = &quot;A set of APIs to perform management on bank accounts and communication with account-service.&quot;)
+@RestController
+@RequestMapping(&quot;/customers/accounts&quot;)
+@RequiredArgsConstructor
+public class AccountManagementController {
+    private final AccountManagementService accountManagementService;
+
+    @Operation(description = &quot;&quot;&quot;
+            An API call to retrieve customer details to the account-service.
+            &quot;&quot;&quot;)
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping(&quot;/{customerId}&quot;)
+    public CustomerDetailsDTO getCustomerDetails(@PathVariable Long customerId) {
+<span class="fc" id="L29">        return accountManagementService.getCustomerDetails(customerId);</span>
+    }
+
+    @Operation(description = &quot;&quot;&quot;
+            An API call to update the customer after creating a new account.
+            &quot;&quot;&quot;)
+    @ResponseStatus(HttpStatus.OK)
+    @PutMapping(&quot;/{customerId}&quot;)
+    public ResponseEntity&lt;Void&gt; updateCustomer(@PathVariable Long customerId, @RequestBody @Valid CustomerDetailsDTO request) {
+<span class="fc" id="L38">        log.debug(&quot;Updating customer with ID: {} with totalAccounts: {}, and hasSalaryAccount: {}&quot;,</span>
+<span class="fc" id="L39">                customerId, request.totalAccounts(), request.hasSalaryAccount());</span>
+
+<span class="fc" id="L41">        accountManagementService.updateCustomer(customerId, request);</span>
+
+<span class="fc" id="L43">        return ResponseEntity.ok().build();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

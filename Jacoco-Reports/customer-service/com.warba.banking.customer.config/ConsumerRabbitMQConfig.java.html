@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ConsumerRabbitMQConfig.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">customer</a> &gt; <a href="index.source.html" class="el_package">com.warba.banking.customer.config</a> &gt; <span class="el_source">ConsumerRabbitMQConfig.java</span></div><h1>ConsumerRabbitMQConfig.java</h1><pre class="source lang-java linenums">package com.warba.banking.customer.config;
+
+import com.warba.banking.customer.listener.AccountEventListener;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
+import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
+import org.springframework.amqp.rabbit.listener.adapter.MessageListenerAdapter;
+import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+<span class="fc" id="L12">public class ConsumerRabbitMQConfig {</span>
+    @Bean
+    public SimpleMessageListenerContainer messageListenerContainer(ConnectionFactory connectionFactory,
+                                                                   MessageListenerAdapter messageListenerAdapter) {
+<span class="fc" id="L16">        SimpleMessageListenerContainer container = new SimpleMessageListenerContainer();</span>
+<span class="fc" id="L17">        container.setConnectionFactory(connectionFactory);</span>
+<span class="fc" id="L18">        container.setQueueNames(&quot;account.closed.queue&quot;);  // Specify the queue name</span>
+<span class="fc" id="L19">        container.setMessageListener(messageListenerAdapter);</span>
+<span class="fc" id="L20">        return container;</span>
+    }
+
+    @Bean
+    public MessageListenerAdapter messageListenerAdapter(AccountEventListener accountEventListener) {
+<span class="fc" id="L25">        MessageListenerAdapter listenerAdapter = new MessageListenerAdapter(accountEventListener, &quot;listen&quot;);</span>
+<span class="fc" id="L26">        listenerAdapter.setMessageConverter(new Jackson2JsonMessageConverter());  // Set the Jackson converter</span>
+<span class="fc" id="L27">        return listenerAdapter;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

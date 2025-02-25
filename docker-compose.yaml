@@ -20,7 +20,7 @@ services:
     container_name: mysql-customers
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: cyberghost23@mysql
+      MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: customers
       MYSQL_USER: customers_user
       MYSQL_PASSWORD: customers_pass

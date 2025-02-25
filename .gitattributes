@@ -1,0 +1,4 @@
+# Ignore JaCoCo HTML reports in language statistics
+*.html linguist-vendored
+*.css linguist-vendored
+*.js linguist-vendored
